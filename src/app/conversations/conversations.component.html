@@ -1,0 +1,156 @@
+<div class="container-fluid p-4">
+  <h2 class="mb-4">My Conversations</h2>
+  
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <div class="input-group">
+        <input 
+          type="text" 
+          class="form-control" 
+          placeholder="Search conversations..." 
+          [(ngModel)]="searchQuery"
+          (keyup.enter)="onSearch()"
+        >
+        <button class="btn btn-primary" (click)="onSearch()">Search</button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="text-center">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+    {{ error }}
+    <button type="button" class="btn-close" (click)="error = null"></button>
+  </div>
+
+  <div *ngIf="!loading && filteredConversations.length === 0" class="alert alert-info">
+    <p *ngIf="conversations.length === 0">
+      No conversations yet. Start a new chat to begin!
+    </p>
+    <p *ngIf="conversations.length > 0">
+      No conversations match your search.
+    </p>
+  </div>
+
+  <div class="row" *ngIf="!loading && filteredConversations.length > 0">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Created</th>
+                  <th>Last Activity</th>
+                  <th>Messages</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let conv of filteredConversations">
+                  <td>
+                    <a href="javascript:void(0)" (click)="openConversation(conv.id)" class="text-decoration-none">
+                      {{ conv.title }}
+                    </a>
+                  </td>
+                  <td>{{ formatDate(conv.createdAt) }}</td>
+                  <td>{{ conv.lastActivity ? formatDate(conv.lastActivity) : 'N/A' }}</td>
+                  <td>{{ conv.messageCount }}</td>
+                  <td>
+                    <div class="btn-group" role="group">
+                      <button 
+                        class="btn btn-sm btn-outline-primary" 
+                        (click)="openConversation(conv.id)"
+                        title="Open conversation"
+                      >
+                        <i class="bi bi-chat"></i>
+                      </button>
+                      <button 
+                        class="btn btn-sm btn-outline-secondary" 
+                        (click)="openEditModal(conv)"
+                        title="Rename conversation"
+                      >
+                        <i class="bi bi-pencil"></i>
+                      </button>
+                      <div class="dropdown position-relative" [ngClass]="{'show': activeDropdown === conv.id}">
+                        <button 
+                          type="button" 
+                          class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                          (click)="toggleDropdown(conv.id)"
+                          title="More options"
+                        >
+                          <i class="bi bi-three-dots"></i>
+                        </button>
+                        <ul class="dropdown-menu" [ngClass]="{'show': activeDropdown === conv.id}">
+                          <li>
+                            <a class="dropdown-item" href="javascript:void(0)" (click)="exportConversation(conv.id, 'json'); closeDropdown()">
+                              <i class="bi bi-file-earmark-code me-2"></i>Export as JSON
+                            </a>
+                          </li>
+                          <li>
+                            <a class="dropdown-item" href="javascript:void(0)" (click)="exportConversation(conv.id, 'markdown'); closeDropdown()">
+                              <i class="bi bi-file-earmark-text me-2"></i>Export as Markdown
+                            </a>
+                          </li>
+                          <li>
+                            <a class="dropdown-item" href="javascript:void(0)" (click)="duplicateConversation(conv.id); closeDropdown()">
+                              <i class="bi bi-copy me-2"></i>Duplicate
+                            </a>
+                          </li>
+                          <li>
+                            <a class="dropdown-item" href="javascript:void(0)" (click)="archiveConversation(conv.id); closeDropdown()">
+                              <i class="bi bi-archive me-2"></i>Archive
+                            </a>
+                          </li>
+                          <li>
+                            <a class="dropdown-item" href="javascript:void(0)" (click)="pinConversation(conv.id); closeDropdown()">
+                              <i class="bi bi-pin me-2"></i>Pin
+                            </a>
+                          </li>
+                          <li><hr class="dropdown-divider"></li>
+                          <li>
+                            <a class="dropdown-item text-danger" href="javascript:void(0)" (click)="deleteConversation(conv.id); closeDropdown()">
+                              <i class="bi bi-trash me-2"></i>Delete
+                            </a>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Title Modal -->
+  <div class="modal fade" [class.show]="showEditModal" [style.display]="showEditModal ? 'block' : 'none'" tabindex="-1" *ngIf="showEditModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Rename Conversation</h5>
+          <button type="button" class="btn-close" (click)="closeEditModal()"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="editTitleInput" class="form-label">New Title</label>
+            <input type="text" class="form-control" id="editTitleInput" [(ngModel)]="editTitle">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeEditModal()">Cancel</button>
+          <button type="button" class="btn btn-primary" (click)="saveTitle()">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop fade" [class.show]="showEditModal" *ngIf="showEditModal"></div>
+</div>

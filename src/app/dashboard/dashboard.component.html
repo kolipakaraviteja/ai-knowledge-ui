@@ -1,0 +1,150 @@
+<div class="dashboard-container">
+  <h2 class="mat-headline-4 mb-4">Dashboard</h2>
+
+  <div *ngIf="loading" class="loading-spinner">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+
+  <div *ngIf="!loading">
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <h3 class="mat-h5">Total Conversations</h3>
+          <p class="mat-headline-3">{{ stats.totalConversations }}</p>
+          <small class="mat-caption">All conversation sessions</small>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <h3 class="mat-h5">Total Documents</h3>
+          <p class="mat-headline-3">{{ stats.totalDocuments }}</p>
+          <small class="mat-caption">Uploaded documents</small>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <h3 class="mat-h5">Total Chunks</h3>
+          <p class="mat-headline-3">{{ stats.totalChunks }}</p>
+          <small class="mat-caption">Document chunks indexed</small>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <h3 class="mat-h5">Knowledge Bases</h3>
+          <p class="mat-headline-3">{{ stats.totalKnowledgeBases }}</p>
+          <small class="mat-caption">Knowledge bases created</small>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Second Row of Statistics -->
+    <div class="stats-grid">
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <h3 class="mat-h5">Collections</h3>
+          <p class="mat-headline-3">{{ stats.totalCollections }}</p>
+          <small class="mat-caption">Document collections</small>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <h3 class="mat-h5">Queries Today</h3>
+          <p class="mat-headline-3">{{ stats.queriesToday }}</p>
+          <small class="mat-caption">Queries processed today</small>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <h3 class="mat-h5">Avg Response Time</h3>
+          <p class="mat-headline-3">{{ formatResponseTime(stats.averageResponseTime) }}</p>
+          <small class="mat-caption">Average query latency</small>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <h3 class="mat-h5">Total Embeddings</h3>
+          <p class="mat-headline-3">{{ stats.totalChunks }}</p>
+          <small class="mat-caption">Vector embeddings stored</small>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Recent Activity -->
+    <mat-card class="mt-4">
+      <mat-card-header>
+        <mat-card-title>Recent Conversations</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div *ngIf="stats.recentActivity.length === 0" class="text-center text-muted">
+          No recent conversations
+        </div>
+        <table mat-table [dataSource]="stats.recentActivity" *ngIf="stats.recentActivity.length > 0" class="w-100">
+          <ng-container matColumnDef="title">
+            <th mat-header-cell *matHeaderCellDef>Title</th>
+            <td mat-cell *matCellDef="let conv">{{ conv.title }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="created">
+            <th mat-header-cell *matHeaderCellDef>Created</th>
+            <td mat-cell *matCellDef="let conv">{{ formatDate(conv.createdAt) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="lastActivity">
+            <th mat-header-cell *matHeaderCellDef>Last Activity</th>
+            <td mat-cell *matCellDef="let conv">{{ conv.lastActivity ? formatDate(conv.lastActivity) : 'N/A' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="messages">
+            <th mat-header-cell *matHeaderCellDef>Messages</th>
+            <td mat-cell *matCellDef="let conv">{{ conv.messageCount }}</td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Quick Actions -->
+    <mat-card class="mt-4 quick-actions-card">
+      <mat-card-header>
+        <mat-card-title>Quick Actions</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="quick-actions">
+          <button mat-raised-button color="primary" routerLink="/chat">
+            <mat-icon>chat</mat-icon>
+            Start New Chat
+          </button>
+          <button mat-raised-button color="accent" routerLink="/documents">
+            <mat-icon>upload_file</mat-icon>
+            Upload Document
+          </button>
+          <button mat-raised-button color="warn" routerLink="/knowledge-bases">
+            <mat-icon>folder</mat-icon>
+            Create Knowledge Base
+          </button>
+          <button mat-stroked-button routerLink="/evaluation">
+            <mat-icon>assessment</mat-icon>
+            Run Evaluation
+          </button>
+          <button mat-stroked-button routerLink="/conversations">
+            <mat-icon>history</mat-icon>
+            View All Conversations
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

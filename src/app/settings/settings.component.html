@@ -1,0 +1,74 @@
+<div class="container-fluid p-4">
+  <h2 class="mb-4">Settings</h2>
+  
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">User Profile</h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input
+              type="text"
+              class="form-control"
+              [value]="(authSvc.currentUser$ | async)?.username"
+              disabled
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input
+              type="email"
+              class="form-control"
+              [value]="(authSvc.currentUser$ | async)?.email"
+              disabled
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Roles</label>
+            <input
+              type="text"
+              class="form-control"
+              [value]="((authSvc.currentUser$ | async)?.roles || []).join(', ')"
+              disabled
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">Preferences</h5>
+        </div>
+        <div class="card-body">
+          <div class="form-check mb-3">
+            <input
+              type="checkbox"
+              class="form-check-input"
+              id="notifications"
+              checked
+            />
+            <label class="form-check-label" for="notifications">
+              Enable Notifications
+            </label>
+          </div>
+          <div class="form-check mb-3">
+            <input
+              type="checkbox"
+              class="form-check-input"
+              id="darkMode"
+            />
+            <label class="form-check-label" for="darkMode">
+              Dark Mode
+            </label>
+          </div>
+          <button class="btn btn-primary">Save Preferences</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,24 @@
+<div class="knowledge-management-container">
+  <div class="header">
+    <h2>Knowledge Management</h2>
+    <p class="subtitle">Manage your knowledge bases, collections, and documents</p>
+  </div>
+
+  <mat-tab-group [selectedIndex]="selectedTab" (selectedIndexChange)="onTabChange($event)">
+    <mat-tab label="Knowledge Bases">
+      <ng-template matTabContent>
+        <app-knowledge-bases-list></app-knowledge-bases-list>
+      </ng-template>
+    </mat-tab>
+    <mat-tab label="Collections">
+      <ng-template matTabContent>
+        <app-collections-list></app-collections-list>
+      </ng-template>
+    </mat-tab>
+    <mat-tab label="Documents">
+      <ng-template matTabContent>
+        <app-documents-list></app-documents-list>
+      </ng-template>
+    </mat-tab>
+  </mat-tab-group>
+</div>

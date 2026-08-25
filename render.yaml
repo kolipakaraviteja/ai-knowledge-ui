@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: enterprise-ai-frontend
+    runtime: static
+    buildCommand: npm install && npm run build -- --configuration=render --base-href=/
+    publishDir: dist/knowledge-assistant-ui
+    plan: free
+    envVars:
+      - key: API_URL
+        sync: false # Set this to your backend URL after deployment

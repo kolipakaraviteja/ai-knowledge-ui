@@ -1,0 +1,150 @@
+<div class="chat-container d-flex h-100 flex-column">
+  <div class="chat-header p-3 border-bottom bg-light">
+    <div class="d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center flex-grow-1">
+        <button class="btn btn-link text-white me-2" (click)="toggleConversationHistory()" title="Conversation History">
+          <i class="bi bi-clock-history"></i>
+        </button>
+        <div class="flex-grow-1">
+          <h5 class="mb-0" *ngIf="!editingTitle">{{ conversationTitle }}</h5>
+          <input 
+            *ngIf="editingTitle"
+            class="form-control form-control-sm"
+            [(ngModel)]="conversationTitle"
+            (blur)="editingTitle = false; updateConversationTitle()"
+            (keyup.enter)="editingTitle = false; updateConversationTitle()"
+            (keyup.escape)="editingTitle = false"
+          />
+        </div>
+        <button class="btn btn-link text-white ms-2" (click)="editingTitle = true" *ngIf="!editingTitle" title="Edit Title">
+          <i class="bi bi-pencil"></i>
+        </button>
+      </div>
+      <button class="btn btn-link text-white" (click)="startNewConversation()" title="New Conversation">
+        <i class="bi bi-plus-lg"></i>
+      </button>
+    </div>
+    <small class="text-white">
+      {{ isLoading ? 'Processing...' : 'Ready to chat' }}
+    </small>
+  </div>
+
+  <!-- Conversation History Sidebar -->
+  <div *ngIf="showConversationHistory" class="conversation-history-sidebar p-3 border-end bg-white">
+    <h6 class="mb-3">Conversation History</h6>
+    <div *ngIf="conversations.length === 0" class="text-muted small">
+      No previous conversations
+    </div>
+    <div *ngFor="let conv of conversations" class="conversation-item p-2 mb-2 rounded cursor-pointer" 
+         (click)="loadConversation(conv.id)"
+         [class.active]="conversationId === conv.id">
+      <div class="d-flex justify-content-between align-items-center">
+        <strong class="small">{{ conv.title }}</strong>
+        <button class="btn btn-link text-danger p-0 ms-2" (click)="deleteConversation(conv.id, $event)" title="Delete">
+          <i class="bi bi-trash"></i>
+        </button>
+      </div>
+      <small class="text-muted d-block">{{ formatDate(conv.lastActivity) }}</small>
+      <small class="text-muted">{{ conv.messageCount }} messages</small>
+    </div>
+  </div>
+
+  <!-- Knowledge Base and Collection Selector -->
+  <div class="p-3 border-bottom bg-white">
+    <div class="row g-2">
+      <div class="col-md-6">
+        <label for="kbSelect" class="form-label small text-muted mb-1">Knowledge Base:</label>
+        <select class="form-select form-select-sm" id="kbSelect" [(ngModel)]="selectedKnowledgeBaseId" (change)="onKnowledgeBaseChange($event)">
+          <option value="">All Knowledge Bases</option>
+          <option *ngFor="let kb of knowledgeBases" [value]="kb.id">{{ kb.name }}</option>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label for="collectionSelect" class="form-label small text-muted mb-1">Collection:</label>
+        <select class="form-select form-select-sm" id="collectionSelect" [(ngModel)]="selectedCollectionId" (change)="onCollectionChange($event)" [disabled]="!selectedKnowledgeBaseId">
+          <option value="">All Collections</option>
+          <option *ngFor="let collection of collections" [value]="collection.id">{{ collection.name }}</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="messages-container flex-grow-1 overflow-auto p-3">
+    <div *ngIf="messages.length === 0" class="text-center mt-5">
+      <p class="text-muted">Start a conversation by typing a message below</p>
+    </div>
+
+    <div *ngFor="let msg of messages" class="mb-3">
+      <div
+        class="message"
+        [ngClass]="{
+          'message-user': msg.sender === 'user',
+          'message-assistant': msg.sender === 'assistant'
+        }"
+      >
+        <strong>{{ msg.sender === 'user' ? 'You' : 'Assistant' }}:</strong>
+        <div class="mt-2" *ngIf="msg.sender === 'user'">{{ msg.content }}</div>
+        <div class="mt-2 markdown-content" *ngIf="msg.sender === 'assistant'" [innerHTML]="parseMarkdown(msg.content)"></div>
+        <div
+          *ngIf="msg.citations && msg.citations.length > 0"
+          class="citations mt-2 pt-2 border-top"
+        >
+          <small class="text-muted d-block mb-1">Sources:</small>
+          <div *ngFor="let citation of msg.citations; let i = index" class="citation-item">
+            <div 
+              class="citation-header cursor-pointer"
+              (click)="toggleCitation(getCitationId(citation, i))"
+            >
+              <small>
+                <strong>{{ citation.documentName }}</strong>
+                <span *ngIf="citation.pageNumber"> (page {{ citation.pageNumber }})</span>
+                <span *ngIf="citation.relevanceScore" class="text-muted ms-2">
+                  ({{ (citation.relevanceScore * 100).toFixed(1) }}% relevance)
+                </span>
+                <span class="ms-2">
+                  <i class="bi" [class.bi-chevron-down]="!isCitationExpanded(getCitationId(citation, i))" 
+                               [class.bi-chevron-up]="isCitationExpanded(getCitationId(citation, i))"></i>
+                </span>
+              </small>
+            </div>
+            <div *ngIf="isCitationExpanded(getCitationId(citation, i))" class="citation-content mt-2 p-2 bg-light rounded">
+              <small class="text-muted d-block mb-1">Content:</small>
+              <p class="mb-0 small">{{ citation.content }}</p>
+              <small *ngIf="citation.chunkIndex !== undefined" class="text-muted d-block mt-1">
+                Chunk index: {{ citation.chunkIndex }}
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
+      {{ errorMessage }}
+      <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+    </div>
+  </div>
+
+  <div class="message-input p-3 border-top">
+    <div class="input-group">
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Ask a question (e.g., 'What is in the documents?')..."
+        [(ngModel)]="newMessage"
+        (keyup.enter)="sendMessage()"
+        [disabled]="isLoading"
+      />
+      <button
+        class="btn btn-primary"
+        (click)="sendMessage()"
+        [disabled]="!newMessage || isLoading"
+      >
+        {{ isLoading ? 'Sending...' : 'Send' }}
+      </button>
+    </div>
+    <small class="text-muted d-block mt-2">
+      💡 Tip: Ask questions about your uploaded documents
+    </small>
+  </div>
+</div>

@@ -1,0 +1,141 @@
+<div class="sidebar bg-light border-end">
+  <ul class="nav flex-column">
+    <li class="nav-item">
+      <a
+        routerLink="/chat-hub"
+        routerLinkActive="active"
+        class="nav-link d-flex align-items-center"
+      >
+        <i class="bi bi-chat-dots me-2"></i> All Conversations
+      </a>
+    </li>
+    
+    <!-- Knowledge Bases Section -->
+    <li class="nav-item">
+      <a
+        routerLink="/knowledge-management"
+        routerLinkActive="active"
+        class="nav-link d-flex align-items-center"
+        (click)="toggleKnowledgeBases()"
+      >
+        <i class="bi bi-database me-2"></i> Knowledge Bases
+        <i class="bi ms-auto" [ngClass]="showKnowledgeBases ? 'bi-chevron-down' : 'bi-chevron-right'"></i>
+      </a>
+      <ul class="nav flex-column sub-nav ms-3" *ngIf="showKnowledgeBases">
+        <li class="nav-item">
+          <a
+            routerLink="/knowledge-management"
+            [queryParams]="{ tab: 'knowledge-bases' }"
+            routerLinkActive="active"
+            class="nav-link d-flex align-items-center"
+          >
+            <i class="bi bi-database me-2"></i> Knowledge Management
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            routerLink="/knowledge-management"
+            [queryParams]="{ tab: 'collections' }"
+            routerLinkActive="active"
+            class="nav-link d-flex align-items-center"
+          >
+            <i class="bi bi-folder me-2"></i> Collections
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            routerLink="/knowledge-management"
+            [queryParams]="{ tab: 'documents' }"
+            routerLinkActive="active"
+            class="nav-link d-flex align-items-center"
+          >
+            <i class="bi bi-file-earmark-pdf me-2"></i> Documents
+          </a>
+        </li>
+      </ul>
+    </li>
+    
+    <li class="nav-item">
+      <a
+        routerLink="/agent-platform"
+        routerLinkActive="active"
+        class="nav-link d-flex align-items-center"
+      >
+        <i class="bi bi-robot me-2"></i> Agent Platform
+      </a>
+    </li>
+    <li class="nav-item">
+      <a
+        routerLink="/dashboard"
+        routerLinkActive="active"
+        class="nav-link d-flex align-items-center"
+      >
+        <i class="bi bi-speedometer2 me-2"></i> Dashboard
+      </a>
+    </li>
+    <li class="nav-item">
+      <a
+        routerLink="/evaluation"
+        routerLinkActive="active"
+        class="nav-link d-flex align-items-center"
+      >
+        <i class="bi bi-graph-up me-2"></i> Evaluation
+      </a>
+    </li>
+  </ul>
+  
+  <hr class="my-3" />
+  
+  <!-- Recent Conversations Section -->
+  <div class="px-3">
+    <div class="d-flex align-items-center justify-content-between mb-2">
+      <small class="text-muted fw-bold">
+        <i class="bi bi-clock me-1"></i> Recent Conversations
+      </small>
+      <button 
+        class="btn btn-link btn-sm p-0 text-muted" 
+        (click)="toggleConversations()"
+        title="Toggle conversations"
+      >
+        <i class="bi" [ngClass]="showConversations ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+      </button>
+    </div>
+    
+    <div *ngIf="loading" class="text-center py-2">
+      <div class="spinner-border spinner-border-sm" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+    
+    <div *ngIf="!loading && showConversations">
+      <div *ngIf="recentConversations.length === 0" class="text-muted small py-2">
+        No recent conversations
+      </div>
+      <ul class="nav flex-column conversation-list" *ngIf="recentConversations.length > 0">
+        <li class="nav-item" *ngFor="let conv of recentConversations">
+          <a 
+            class="nav-link conversation-item d-flex align-items-center"
+            (click)="openConversation(conv.id)"
+            title="{{ conv.title }}"
+          >
+            <i class="bi bi-chat-left me-2 text-muted"></i>
+            <span class="conversation-title flex-grow-1">{{ conv.title }}</span>
+            <small class="text-muted ms-2">{{ formatDate(conv.lastActivity || conv.createdAt) }}</small>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  
+  <hr class="my-3" />
+  <div class="px-3 text-muted">
+    <small>
+      <p class="mb-2">💡 <strong>Tips:</strong></p>
+      <ul class="ps-3">
+        <li>Upload PDFs, TXT, or DOCX files</li>
+        <li>Ask questions about your documents</li>
+        <li>Get AI-powered answers with citations</li>
+      </ul>
+    </small>
+  </div>
+</div>

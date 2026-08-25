@@ -1,0 +1,478 @@
+<div class="container-fluid py-4">
+  <h2 class="mb-4">Evaluation Framework</h2>
+
+  <div *ngIf="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+    {{ error }}
+    <button type="button" class="btn-close" (click)="error = null"></button>
+  </div>
+
+  <!-- Tabs -->
+  <ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+      <button class="nav-link" [class.active]="activeTab === 'tests'" (click)="activeTab = 'tests'">
+        Test Dataset
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" [class.active]="activeTab === 'runs'" (click)="activeTab = 'runs'">
+        Evaluation Runs
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" [class.active]="activeTab === 'results'" (click)="activeTab = 'results'" [disabled]="!selectedRunId">
+        Results
+      </button>
+    </li>
+  </ul>
+
+  <!-- Tests Tab -->
+  <div *ngIf="activeTab === 'tests'">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h5>Test Questions</h5>
+        <small class="text-muted">Total: {{ testCount }} tests</small>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-primary" (click)="openCreateTestForm()" [disabled]="isLoading">
+          <i class="bi bi-plus-lg me-2"></i>Add Test
+        </button>
+        <button class="btn btn-info" (click)="openEnhancedTestForm()" [disabled]="isLoading">
+          <i class="bi bi-plus-circle me-2"></i>Enhanced Test
+        </button>
+        <button class="btn btn-success" (click)="openGenerateTestsForm()" [disabled]="isLoading">
+          <i class="bi bi-magic me-2"></i>Generate
+        </button>
+        <button class="btn btn-warning" (click)="openLoadManualTestsForm()" [disabled]="isLoading">
+          <i class="bi bi-upload me-2"></i>Load Manual
+        </button>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-3">
+      <div class="card-body">
+        <div class="row align-items-center">
+          <div class="col-md-3">
+            <label class="form-label mb-0">Filter by Category:</label>
+            <select class="form-select" [(ngModel)]="selectedCategory" (change)="filterByCategory(selectedCategory)">
+              <option value="">All Categories</option>
+              <option value="FACTUAL">Factual</option>
+              <option value="CONCEPTUAL">Conceptual</option>
+              <option value="COMPARATIVE">Comparative</option>
+              <option value="NUMERICAL">Numerical</option>
+              <option value="MULTI_HOP">Multi-hop</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label mb-0">Filter by Language:</label>
+            <select class="form-select" [(ngModel)]="selectedLanguage" (change)="filterByLanguage(selectedLanguage)">
+              <option value="">All Languages</option>
+              <option value="ENGLISH">English</option>
+              <option value="TELUGU">Telugu</option>
+              <option value="MIXED">Mixed</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <button class="btn btn-outline-secondary" (click)="clearFilters()">
+              <i class="bi bi-x-circle me-2"></i>Clear Filters
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create Test Form -->
+    <div *ngIf="showCreateTestForm" class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0">Add New Test</h5>
+      </div>
+      <div class="card-body">
+        <form (ngSubmit)="createTest()">
+          <div class="mb-3">
+            <label for="testName" class="form-label">Test Name *</label>
+            <input type="text" class="form-control" id="testName" [(ngModel)]="testFormData.name" name="name" required>
+          </div>
+          <div class="mb-3">
+            <label for="testQuery" class="form-label">Query *</label>
+            <textarea class="form-control" id="testQuery" [(ngModel)]="testFormData.query" name="query" rows="3" required></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="testChunkIds" class="form-label">Expected Chunk IDs (comma-separated)</label>
+            <textarea class="form-control" id="testChunkIds" [(ngModel)]="testFormData.expectedChunkIds" name="expectedChunkIds" rows="2" placeholder="chunk-id-1, chunk-id-2, ..."></textarea>
+          </div>
+          <div>
+            <button type="submit" class="btn btn-primary me-2" [disabled]="isLoading">Create Test</button>
+            <button type="button" class="btn btn-secondary" (click)="closeTestForm()">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Enhanced Test Form -->
+    <div *ngIf="showEnhancedTestForm" class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0">Add Enhanced Test</h5>
+      </div>
+      <div class="card-body">
+        <form (ngSubmit)="createEnhancedTest()">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="enhancedTestName" class="form-label">Test Name *</label>
+              <input type="text" class="form-control" id="enhancedTestName" [(ngModel)]="enhancedTestFormData.name" name="name" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="testCategory" class="form-label">Category</label>
+              <select class="form-select" id="testCategory" [(ngModel)]="enhancedTestFormData.category" name="category">
+                <option value="">Select Category</option>
+                <option value="FACTUAL">Factual</option>
+                <option value="CONCEPTUAL">Conceptual</option>
+                <option value="COMPARATIVE">Comparative</option>
+                <option value="NUMERICAL">Numerical</option>
+                <option value="MULTI_HOP">Multi-hop</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label for="testLanguage" class="form-label">Language</label>
+              <select class="form-select" id="testLanguage" [(ngModel)]="enhancedTestFormData.language" name="language">
+                <option value="">Select Language</option>
+                <option value="ENGLISH">English</option>
+                <option value="TELUGU">Telugu</option>
+                <option value="MIXED">Mixed</option>
+              </select>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="testDifficulty" class="form-label">Difficulty</label>
+              <select class="form-select" id="testDifficulty" [(ngModel)]="enhancedTestFormData.difficulty" name="difficulty">
+                <option value="">Select Difficulty</option>
+                <option value="EASY">Easy</option>
+                <option value="MEDIUM">Medium</option>
+                <option value="HARD">Hard</option>
+              </select>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="testDocumentScope" class="form-label">Document Scope</label>
+              <select class="form-select" id="testDocumentScope" [(ngModel)]="enhancedTestFormData.documentScope" name="documentScope">
+                <option value="">Select Scope</option>
+                <option value="single_doc">Single Document</option>
+                <option value="multi_doc">Multi Document</option>
+                <option value="cross_chapter">Cross Chapter</option>
+              </select>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="enhancedTestQuery" class="form-label">Query *</label>
+            <textarea class="form-control" id="enhancedTestQuery" [(ngModel)]="enhancedTestFormData.query" name="query" rows="3" required></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="enhancedTestChunkIds" class="form-label">Expected Chunk IDs (comma-separated)</label>
+            <textarea class="form-control" id="enhancedTestChunkIds" [(ngModel)]="enhancedTestFormData.expectedChunkIds" name="expectedChunkIds" rows="2" placeholder="chunk-id-1, chunk-id-2, ..."></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="expectedAnswer" class="form-label">Expected Answer</label>
+            <textarea class="form-control" id="expectedAnswer" [(ngModel)]="enhancedTestFormData.expectedAnswer" name="expectedAnswer" rows="3" placeholder="Expected answer for quality evaluation"></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="keyPoints" class="form-label">Key Points (one per line)</label>
+            <textarea class="form-control" id="keyPoints" [(ngModel)]="enhancedTestFormData.keyPoints" name="keyPoints" rows="3" placeholder="Key point 1&#10;Key point 2&#10;Key point 3"></textarea>
+          </div>
+          <div>
+            <button type="submit" class="btn btn-primary me-2" [disabled]="isLoading">Create Enhanced Test</button>
+            <button type="button" class="btn btn-secondary" (click)="closeEnhancedTestForm()">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Generate Tests Form -->
+    <div *ngIf="showGenerateTestsForm" class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0">Generate Tests using LLM</h5>
+      </div>
+      <div class="card-body">
+        <form (ngSubmit)="generateTests()">
+          <div class="mb-3">
+            <label for="sampleSize" class="form-label">Sample Size</label>
+            <input type="number" class="form-control" id="sampleSize" [(ngModel)]="generateTestsFormData.sampleSize" name="sampleSize" min="1" max="50" value="10">
+            <small class="text-muted">Number of document chunks to sample for test generation</small>
+          </div>
+          <div>
+            <button type="submit" class="btn btn-success me-2" [disabled]="isLoading">Generate Tests</button>
+            <button type="button" class="btn btn-secondary" (click)="closeGenerateTestsForm()">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Load Manual Tests Form -->
+    <div *ngIf="showLoadManualTestsForm" class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0">Load Manual Tests from JSON</h5>
+      </div>
+      <div class="card-body">
+        <form (ngSubmit)="loadManualTests()">
+          <div class="mb-3">
+            <label for="filePath" class="form-label">File Path</label>
+            <input type="text" class="form-control" id="filePath" [(ngModel)]="loadManualTestsFormData.filePath" name="filePath" value="manual-evaluation-tests.json">
+            <small class="text-muted">Path to JSON file containing manual test cases</small>
+          </div>
+          <div>
+            <button type="submit" class="btn btn-warning me-2" [disabled]="isLoading">Load Tests</button>
+            <button type="button" class="btn btn-secondary" (click)="closeLoadManualTestsForm()">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Tests List -->
+    <div *ngIf="isLoading && !showCreateTestForm && !showEnhancedTestForm && !showGenerateTestsForm && !showLoadManualTestsForm" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+
+    <div *ngIf="!isLoading && tests.length === 0" class="alert alert-info">
+      No tests found. Add your first test to get started.
+    </div>
+
+    <div class="table-responsive" *ngIf="!isLoading && tests.length > 0">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Language</th>
+            <th>Difficulty</th>
+            <th>Query</th>
+            <th>Expected Chunks</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let test of tests">
+            <td>{{ test.name }}</td>
+            <td>
+              <span class="badge" [class]="getCategoryBadgeClass(test.category || '')">{{ getTestCategory(test) }}</span>
+            </td>
+            <td>{{ getTestLanguage(test) }}</td>
+            <td>
+              <span class="badge" [class]="getDifficultyBadgeClass(test.difficulty || '')">{{ getTestDifficulty(test) }}</span>
+            </td>
+            <td class="text-truncate" style="max-width: 250px;">{{ test.query }}</td>
+            <td>{{ test.expectedChunkIds.length }}</td>
+            <td>{{ formatDate(test.createdAt) }}</td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary me-1" (click)="runSingleTest(test.id)" [disabled]="isLoading">
+                <i class="bi bi-play"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger" (click)="deleteTest(test.id)">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Runs Tab -->
+  <div *ngIf="activeTab === 'runs'">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5>Evaluation Runs</h5>
+      <button class="btn btn-primary" (click)="openCreateRunForm()" [disabled]="isLoading">
+        <i class="bi bi-play-circle me-2"></i>New Run
+      </button>
+    </div>
+
+    <!-- Create Run Form -->
+    <div *ngIf="showCreateRunForm" class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0">Create New Evaluation Run</h5>
+      </div>
+      <div class="card-body">
+        <form (ngSubmit)="createRun()">
+          <div class="mb-3">
+            <label for="runName" class="form-label">Run Name *</label>
+            <input type="text" class="form-control" id="runName" [(ngModel)]="runFormData.name" name="name" required>
+          </div>
+          <div class="mb-3">
+            <label for="runDescription" class="form-label">Description</label>
+            <textarea class="form-control" id="runDescription" [(ngModel)]="runFormData.description" name="description" rows="3"></textarea>
+          </div>
+          <div>
+            <button type="submit" class="btn btn-primary me-2" [disabled]="isLoading">Create & Run</button>
+            <button type="button" class="btn btn-secondary" (click)="closeRunForm()">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Runs List -->
+    <div *ngIf="isLoading && !showCreateRunForm" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+
+    <div *ngIf="!isLoading && runs.length === 0" class="alert alert-info">
+      No evaluation runs found. Create your first run to evaluate the system.
+    </div>
+
+    <div class="table-responsive" *ngIf="!isLoading && runs.length > 0">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Status</th>
+            <th>Started</th>
+            <th>Completed</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let run of runs">
+            <td>{{ run.name }}</td>
+            <td>{{ run.description || '-' }}</td>
+            <td>
+              <span class="badge" [class]="getStatusBadgeClass(run.status)">{{ run.status }}</span>
+            </td>
+            <td>{{ formatDate(run.startedAt) }}</td>
+            <td>{{ run.completedAt ? formatDate(run.completedAt) : '-' }}</td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary me-2" (click)="loadResults(run.id)" [disabled]="run.status !== 'COMPLETED'">
+                <i class="bi bi-eye"></i> View Results
+              </button>
+              <button class="btn btn-sm btn-outline-danger" (click)="deleteRun(run.id)">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Results Tab -->
+  <div *ngIf="activeTab === 'results' && selectedRunId">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5>Evaluation Results</h5>
+      <button class="btn btn-outline-primary" (click)="exportResults()">
+        <i class="bi bi-download me-2"></i>Export CSV
+      </button>
+    </div>
+
+    <!-- Enhanced Summary Metrics -->
+    <div class="row mb-4" *ngIf="results.length > 0">
+      <div class="col-md-3">
+        <div class="card text-center">
+          <div class="card-body">
+            <h6 class="card-title">Recall@5</h6>
+            <h3 class="text-primary">{{ getEnhancedMetric(results[0], 'recall_at_5') }}</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-center">
+          <div class="card-body">
+            <h6 class="card-title">Precision@5</h6>
+            <h3 class="text-success">{{ getEnhancedMetric(results[0], 'precision_at_5') }}</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-center">
+          <div class="card-body">
+            <h6 class="card-title">NDCG@10</h6>
+            <h3 class="text-info">{{ getEnhancedMetric(results[0], 'ndcg_at_10') }}</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-center">
+          <div class="card-body">
+            <h6 class="card-title">MAP</h6>
+            <h3 class="text-warning">{{ getEnhancedMetric(results[0], 'map') }}</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Answer Quality Metrics -->
+    <div class="row mb-4" *ngIf="results.length > 0 && results[0].metrics.faithfulness">
+      <div class="col-md-3">
+        <div class="card text-center">
+          <div class="card-body">
+            <h6 class="card-title">Faithfulness</h6>
+            <h3 class="text-primary">{{ getEnhancedMetric(results[0], 'faithfulness') }}</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-center">
+          <div class="card-body">
+            <h6 class="card-title">Relevance</h6>
+            <h3 class="text-success">{{ getEnhancedMetric(results[0], 'relevance') }}</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-center">
+          <div class="card-body">
+            <h6 class="card-title">Completeness</h6>
+            <h3 class="text-info">{{ getEnhancedMetric(results[0], 'completeness') }}</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-center">
+          <div class="card-body">
+            <h6 class="card-title">Overall Quality</h6>
+            <h3 class="text-warning">{{ getEnhancedMetric(results[0], 'overall_quality') }}</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="isLoading" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+
+    <div *ngIf="!isLoading && results.length === 0" class="alert alert-info">
+      No results found for this run.
+    </div>
+
+    <div class="table-responsive" *ngIf="!isLoading && results.length > 0">
+      <table class="table table-hover table-sm">
+        <thead>
+          <tr>
+            <th>Query</th>
+            <th>Recall@5</th>
+            <th>Precision@5</th>
+            <th>NDCG@10</th>
+            <th>MAP</th>
+            <th>Faithfulness</th>
+            <th>Relevance</th>
+            <th>Latency (ms)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let result of results">
+            <td class="text-truncate" style="max-width: 200px;">{{ result.query || '-' }}</td>
+            <td>{{ getEnhancedMetric(result, 'recall_at_5') }}</td>
+            <td>{{ getEnhancedMetric(result, 'precision_at_5') }}</td>
+            <td>{{ getEnhancedMetric(result, 'ndcg_at_10') }}</td>
+            <td>{{ getEnhancedMetric(result, 'map') }}</td>
+            <td>{{ getEnhancedMetric(result, 'faithfulness') }}</td>
+            <td>{{ getEnhancedMetric(result, 'relevance') }}</td>
+            <td>{{ result.latencyMs }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

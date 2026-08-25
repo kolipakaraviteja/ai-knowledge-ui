@@ -1,0 +1,19 @@
+<div class="chat-hub-container">
+  <div class="header">
+    <h2>Chat Hub</h2>
+    <p class="subtitle">Interact with AI and manage your conversations</p>
+  </div>
+
+  <mat-tab-group [selectedIndex]="selectedTab" (selectedIndexChange)="onTabChange($event)">
+    <mat-tab label="Chat">
+      <ng-template matTabContent>
+        <app-chat-interface></app-chat-interface>
+      </ng-template>
+    </mat-tab>
+    <mat-tab label="Conversations">
+      <ng-template matTabContent>
+        <app-conversations-list></app-conversations-list>
+      </ng-template>
+    </mat-tab>
+  </mat-tab-group>
+</div>

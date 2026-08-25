@@ -1,0 +1,104 @@
+<div class="knowledge-bases-container">
+  <h2 class="mat-headline-4 mb-4">Knowledge Bases</h2>
+
+  <div class="header-actions">
+    <button mat-raised-button color="primary" (click)="openCreateForm()" [disabled]="isLoading">
+      <mat-icon>add</mat-icon>
+      Create Knowledge Base
+    </button>
+  </div>
+
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+    <button mat-icon-button (click)="error = null" class="float-right">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Create Form -->
+  <mat-card *ngIf="showCreateForm" class="mb-4">
+    <mat-card-header>
+      <mat-card-title>Create New Knowledge Base</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form (ngSubmit)="createKnowledgeBase()">
+        <mat-form-field appearance="outline" class="w-100 mb-3">
+          <mat-label>Name *</mat-label>
+          <input matInput [(ngModel)]="formData.name" name="name" required>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="w-100 mb-3">
+          <mat-label>Description</mat-label>
+          <textarea matInput [(ngModel)]="formData.description" name="description" rows="3"></textarea>
+        </mat-form-field>
+        <div class="form-actions">
+          <button mat-raised-button color="primary" type="submit" [disabled]="isLoading">Create</button>
+          <button mat-stroked-button type="button" (click)="closeForms()">Cancel</button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Edit Form -->
+  <mat-card *ngIf="showEditForm" class="mb-4">
+    <mat-card-header>
+      <mat-card-title>Edit Knowledge Base</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form (ngSubmit)="updateKnowledgeBase()">
+        <mat-form-field appearance="outline" class="w-100 mb-3">
+          <mat-label>Name *</mat-label>
+          <input matInput [(ngModel)]="formData.name" name="name" required>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="w-100 mb-3">
+          <mat-label>Description</mat-label>
+          <textarea matInput [(ngModel)]="formData.description" name="description" rows="3"></textarea>
+        </mat-form-field>
+        <div class="form-actions">
+          <button mat-raised-button color="primary" type="submit" [disabled]="isLoading">Update</button>
+          <button mat-stroked-button type="button" (click)="closeForms()">Cancel</button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Knowledge Bases List -->
+  <div *ngIf="isLoading && !showCreateForm && !showEditForm" class="text-center py-5">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <div *ngIf="!isLoading && knowledgeBases.length === 0" class="empty-state">
+    <mat-icon class="large-icon">folder_open</mat-icon>
+    <p class="mt-2">No knowledge bases found. Create your first knowledge base to get started.</p>
+  </div>
+
+  <div class="kb-grid" *ngIf="!isLoading && knowledgeBases.length > 0">
+    <mat-card class="kb-card" *ngFor="let kb of knowledgeBases">
+      <mat-card-header>
+        <mat-card-title>{{ kb.name }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p class="kb-description">{{ kb.description || 'No description' }}</p>
+        <div class="kb-meta">
+          <div class="meta-item">
+            <mat-icon class="meta-icon">calendar_today</mat-icon>
+            <span>Created: {{ formatDate(kb.createdAt) }}</span>
+          </div>
+          <div class="meta-item">
+            <mat-icon class="meta-icon">update</mat-icon>
+            <span>Updated: {{ formatDate(kb.updatedAt) }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-stroked-button color="primary" (click)="openEditForm(kb)">
+          <mat-icon>edit</mat-icon>
+          Edit
+        </button>
+        <button mat-stroked-button color="warn" (click)="deleteKnowledgeBase(kb.id)">
+          <mat-icon>delete</mat-icon>
+          Delete
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+</div>

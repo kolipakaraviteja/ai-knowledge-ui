@@ -1,0 +1,113 @@
+<div class="chat-container">
+  <div class="chat-header">
+    <div class="d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center flex-grow-1">
+        <h5 class="mb-0">{{ conversationTitle }}</h5>
+      </div>
+      <button mat-icon-button (click)="startNewConversation()" title="New Conversation">
+        <mat-icon>add</mat-icon>
+      </button>
+    </div>
+    <small class="text-muted">
+      {{ isLoading ? 'Processing...' : 'Ready to chat' }}
+    </small>
+  </div>
+
+  <!-- Knowledge Base and Collection Selector -->
+  <div class="kb-collection-selector">
+    <div class="selector-row">
+      <mat-form-field appearance="outline" class="selector-field">
+        <mat-label>Knowledge Base</mat-label>
+        <mat-select [(value)]="selectedKnowledgeBaseId" (selectionChange)="onKnowledgeBaseChange($event)">
+          <mat-option value="">All Knowledge Bases</mat-option>
+          <mat-option *ngFor="let kb of knowledgeBases" [value]="kb.id">{{ kb.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="selector-field">
+        <mat-label>Collection</mat-label>
+        <mat-select [(value)]="selectedCollectionId" (selectionChange)="onCollectionChange($event)" [disabled]="!selectedKnowledgeBaseId">
+          <mat-option value="">All Collections</mat-option>
+          <mat-option *ngFor="let collection of collections" [value]="collection.id">{{ collection.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <div class="messages-container">
+    <div *ngIf="messages.length === 0" class="empty-state">
+      <mat-icon class="large-icon">chat_bubble_outline</mat-icon>
+      <p class="text-muted">Start a conversation by typing a message below</p>
+    </div>
+
+    <div *ngFor="let msg of messages" class="message-wrapper">
+      <div
+        class="message"
+        [ngClass]="{
+          'message-user': msg.sender === 'user',
+          'message-assistant': msg.sender === 'assistant'
+        }"
+      >
+        <strong>{{ msg.sender === 'user' ? 'You' : 'Assistant' }}:</strong>
+        <div class="mt-2" *ngIf="msg.sender === 'user'">{{ msg.content }}</div>
+        <div class="mt-2 markdown-content" *ngIf="msg.sender === 'assistant'" [innerHTML]="parseMarkdown(msg.content)"></div>
+        <div
+          *ngIf="msg.citations && msg.citations.length > 0"
+          class="citations"
+        >
+          <small class="text-muted d-block mb-1">Sources:</small>
+          <div *ngFor="let citation of msg.citations; let i = index" class="citation-item">
+            <div 
+              class="citation-header"
+              (click)="toggleCitation(getCitationId(citation, i))"
+            >
+              <small>
+                <strong>{{ citation.documentName }}</strong>
+                <span *ngIf="citation.pageNumber"> (page {{ citation.pageNumber }})</span>
+                <span *ngIf="citation.relevanceScore" class="text-muted ms-2">
+                  ({{ (citation.relevanceScore * 100).toFixed(1) }}% relevance)
+                </span>
+                <span class="ms-2">
+                  <mat-icon [ngClass]="isCitationExpanded(getCitationId(citation, i)) ? 'expand_less' : 'expand_more'"></mat-icon>
+                </span>
+              </small>
+            </div>
+            <div *ngIf="isCitationExpanded(getCitationId(citation, i))" class="citation-content">
+              <small class="text-muted d-block mb-1">Content:</small>
+              <p class="mb-0 small">{{ citation.content }}</p>
+              <small *ngIf="citation.chunkIndex !== undefined" class="text-muted d-block mt-1">
+                Chunk index: {{ citation.chunkIndex }}
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="errorMessage" class="error-message">
+      {{ errorMessage }}
+      <button mat-icon-button (click)="errorMessage = ''" class="float-right">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <div class="message-input">
+    <div class="input-group">
+      <mat-form-field appearance="outline" class="message-field">
+        <mat-label>Ask a question...</mat-label>
+        <input matInput [(ngModel)]="newMessage" (keyup.enter)="sendMessage()" [disabled]="isLoading" />
+      </mat-form-field>
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="sendMessage()"
+        [disabled]="!newMessage || isLoading"
+      >
+        {{ isLoading ? 'Sending...' : 'Send' }}
+      </button>
+    </div>
+    <small class="text-muted d-block mt-2">
+      💡 Tip: Ask questions about your uploaded documents
+    </small>
+  </div>
+</div>

@@ -1,0 +1,124 @@
+<div class="advanced-search-container">
+  <mat-card>
+    <mat-card-content>
+      <!-- Main Search Bar -->
+      <div class="search-bar">
+        <mat-form-field appearance="outline" class="search-input">
+          <mat-label>Search documents and conversations</mat-label>
+          <input matInput [(ngModel)]="searchQuery" (keyup.enter)="onSearch()" (input)="onQueryChange()" placeholder="Try 'vacation policy' or 'company handbook'">
+          <mat-icon matPrefix>search</mat-icon>
+          <button mat-icon-button matSuffix (click)="onSearch()" [disabled]="!searchQuery.trim()">
+            <mat-icon>arrow_forward</mat-icon>
+          </button>
+        </mat-form-field>
+        
+        <button mat-icon-button (click)="toggleAdvancedFilters()" [color]="showAdvancedFilters ? 'primary' : ''" title="Advanced filters">
+          <mat-icon>tune</mat-icon>
+        </button>
+        
+        <button mat-icon-button (click)="onClear()" title="Clear filters" *ngIf="activeFilters.length > 0">
+          <mat-icon>clear</mat-icon>
+        </button>
+      </div>
+
+      <!-- Search Suggestions -->
+      <div class="suggestions" *ngIf="showSuggestions && suggestions.length > 0">
+        <div class="suggestion-item" *ngFor="let suggestion of suggestions" (click)="selectSuggestion(suggestion)">
+          <mat-icon>history</mat-icon>
+          <span>{{ suggestion }}</span>
+        </div>
+      </div>
+
+      <!-- Active Filters -->
+      <div class="active-filters" *ngIf="activeFilters.length > 0">
+        <mat-chip-listbox>
+          <mat-chip *ngFor="let filter of activeFilters" (removed)="removeFilter(filter)">
+            {{ filter.label }}
+            <mat-icon matChipRemove>cancel</mat-icon>
+          </mat-chip>
+        </mat-chip-listbox>
+      </div>
+
+      <!-- Advanced Filters -->
+      <div class="advanced-filters" *ngIf="showAdvancedFilters">
+        <div class="filter-section">
+          <h4 class="mat-subheading-2">File Type</h4>
+          <div class="filter-options">
+            <mat-checkbox *ngFor="let fileType of fileTypes" 
+                          [checked]="selectedFileTypes.includes(fileType)"
+                          (change)="onFileTypeToggle(fileType)">
+              {{ fileType }}
+            </mat-checkbox>
+          </div>
+        </div>
+
+        <div class="filter-section">
+          <h4 class="mat-subheading-2">Date Range</h4>
+          <div class="date-range">
+            <mat-form-field appearance="outline">
+              <mat-label>From</mat-label>
+              <input matInput [matDatepicker]="startDatePicker" [(ngModel)]="selectedDateRange.start">
+              <mat-datepicker-toggle matSuffix [for]="startDatePicker"></mat-datepicker-toggle>
+              <mat-datepicker #startDatePicker></mat-datepicker>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline">
+              <mat-label>To</mat-label>
+              <input matInput [matDatepicker]="endDatePicker" [(ngModel)]="selectedDateRange.end">
+              <mat-datepicker-toggle matSuffix [for]="endDatePicker"></mat-datepicker-toggle>
+              <mat-datepicker #endDatePicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="filter-section">
+          <h4 class="mat-subheading-2">File Size (MB)</h4>
+          <div class="size-range">
+            <mat-form-field appearance="outline">
+              <mat-label>Min</mat-label>
+              <input matInput type="number" [(ngModel)]="minFileSize" placeholder="0">
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline">
+              <mat-label>Max</mat-label>
+              <input matInput type="number" [(ngModel)]="maxFileSize" placeholder="50">
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="filter-section">
+          <h4 class="mat-subheading-2">Knowledge Base</h4>
+          <mat-form-field appearance="outline">
+            <mat-label>Select Knowledge Bases</mat-label>
+            <mat-select multiple [(ngModel)]="selectedKnowledgeBases">
+              <mat-option *ngFor="let kb of knowledgeBases" [value]="kb">{{ kb }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="filter-actions">
+          <button mat-raised-button color="primary" (click)="onSearch()">
+            <mat-icon>search</mat-icon>
+            Apply Filters
+          </button>
+          <button mat-stroked-button (click)="onClear()">
+            <mat-icon>refresh</mat-icon>
+            Reset All
+          </button>
+        </div>
+      </div>
+
+      <!-- Recent Searches -->
+      <div class="recent-searches" *ngIf="!showAdvancedFilters && searchHistory.length > 0">
+        <h4 class="mat-subheading-2">Recent Searches</h4>
+        <div class="history-list">
+          <div class="history-item" *ngFor="let item of searchHistory" (click)="selectSuggestion(item.query)">
+            <mat-icon>history</mat-icon>
+            <span>{{ item.query }}</span>
+            <small class="mat-caption">{{ item.timestamp | date:'short' }}</small>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

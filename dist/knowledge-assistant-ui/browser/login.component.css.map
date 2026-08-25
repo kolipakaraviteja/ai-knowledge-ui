@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/auth/login.component.css"],
+  "sourcesContent": [".min-vh-100 {\n  min-height: 100vh;\n}\n.card {\n  border: none;\n  border-radius: 0.5rem;\n}\n"],
+  "mappings": ";AAAA,CAAC;AACC,cAAY;AACd;AACA,CAAC;AACC,UAAQ;AACR,iBAAe;AACjB;",
+  "names": []
+}

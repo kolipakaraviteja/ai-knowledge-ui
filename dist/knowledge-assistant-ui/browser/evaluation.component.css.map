@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/evaluation/evaluation.component.css"],
+  "sourcesContent": [".card {\n  margin-bottom: 1rem;\n}\n\n.table-hover tbody tr:hover {\n  background-color: #f8f9fa;\n}\n\n.text-truncate {\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n\n.badge {\n  font-size: 0.875rem;\n}\n"],
+  "mappings": ";AAAA,CAAC;AACC,iBAAe;AACjB;AAEA,CAAC,YAAY,MAAM,EAAE;AACnB,oBAAkB;AACpB;AAEA,CAAC;AACC,eAAa;AACb,YAAU;AACV,iBAAe;AACjB;AAEA,CAAC;AACC,aAAW;AACb;",
+  "names": []
+}

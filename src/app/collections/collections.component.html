@@ -1,0 +1,115 @@
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Collections</h2>
+    <button class="btn btn-primary" (click)="openCreateForm()" [disabled]="isLoading || !selectedKnowledgeBaseId">
+      <i class="bi bi-plus-lg me-2"></i>Create Collection
+    </button>
+  </div>
+
+  <!-- Knowledge Base Selector -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="row align-items-center">
+        <div class="col-md-3">
+          <label for="kbSelect" class="form-label fw-bold">Knowledge Base:</label>
+        </div>
+        <div class="col-md-9">
+          <select class="form-select" id="kbSelect" [(ngModel)]="selectedKnowledgeBaseId" (change)="onKnowledgeBaseChange($event)">
+            <option value="">Select a knowledge base...</option>
+            <option *ngFor="let kb of knowledgeBases" [value]="kb.id">{{ kb.name }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+    {{ error }}
+    <button type="button" class="btn-close" (click)="error = null"></button>
+  </div>
+
+  <!-- Create Form -->
+  <div *ngIf="showCreateForm" class="card mb-4">
+    <div class="card-header">
+      <h5 class="mb-0">Create New Collection</h5>
+    </div>
+    <div class="card-body">
+      <form (ngSubmit)="createCollection()">
+        <div class="mb-3">
+          <label for="collectionName" class="form-label">Name *</label>
+          <input type="text" class="form-control" id="collectionName" [(ngModel)]="formData.name" name="name" required>
+        </div>
+        <div class="mb-3">
+          <label for="collectionDescription" class="form-label">Description</label>
+          <textarea class="form-control" id="collectionDescription" [(ngModel)]="formData.description" name="description" rows="3"></textarea>
+        </div>
+        <div>
+          <button type="submit" class="btn btn-primary me-2" [disabled]="isLoading">Create</button>
+          <button type="button" class="btn btn-secondary" (click)="closeForms()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Form -->
+  <div *ngIf="showEditForm" class="card mb-4">
+    <div class="card-header">
+      <h5 class="mb-0">Edit Collection</h5>
+    </div>
+    <div class="card-body">
+      <form (ngSubmit)="updateCollection()">
+        <div class="mb-3">
+          <label for="editCollectionName" class="form-label">Name *</label>
+          <input type="text" class="form-control" id="editCollectionName" [(ngModel)]="formData.name" name="name" required>
+        </div>
+        <div class="mb-3">
+          <label for="editCollectionDescription" class="form-label">Description</label>
+          <textarea class="form-control" id="editCollectionDescription" [(ngModel)]="formData.description" name="description" rows="3"></textarea>
+        </div>
+        <div>
+          <button type="submit" class="btn btn-primary me-2" [disabled]="isLoading">Update</button>
+          <button type="button" class="btn btn-secondary" (click)="closeForms()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Collections List -->
+  <div *ngIf="isLoading && !showCreateForm && !showEditForm" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading && !selectedKnowledgeBaseId" class="alert alert-info">
+    Please select a knowledge base to view its collections.
+  </div>
+
+  <div *ngIf="!isLoading && selectedKnowledgeBaseId && collections.length === 0" class="alert alert-info">
+    No collections found in this knowledge base. Create your first collection to get started.
+  </div>
+
+  <div class="row" *ngIf="!isLoading && selectedKnowledgeBaseId && collections.length > 0">
+    <div class="col-md-6 col-lg-4 mb-4" *ngFor="let collection of collections">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title">{{ collection.name }}</h5>
+          <p class="card-text text-muted">{{ collection.description || 'No description' }}</p>
+          <div class="small text-muted mb-3">
+            <div>Knowledge Base: {{ getKnowledgeBaseName(collection.knowledgeBaseId) }}</div>
+            <div>Created: {{ formatDate(collection.createdAt) }}</div>
+            <div>Updated: {{ formatDate(collection.updatedAt) }}</div>
+          </div>
+        </div>
+        <div class="card-footer bg-white border-top-0">
+          <button class="btn btn-sm btn-outline-primary me-2" (click)="openEditForm(collection)">
+            <i class="bi bi-pencil"></i> Edit
+          </button>
+          <button class="btn btn-sm btn-outline-danger" (click)="deleteCollection(collection.id)">
+            <i class="bi bi-trash"></i> Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

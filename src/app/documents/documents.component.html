@@ -1,0 +1,263 @@
+<div class="documents-container">
+  <h2 class="mat-headline-4 mb-4">Knowledge Base Documents</h2>
+
+  <!-- Advanced Search -->
+  <app-advanced-search (search)="onAdvancedSearch($event)" class="mb-4"></app-advanced-search>
+
+  <!-- Knowledge Base and Collection Selector -->
+  <mat-card class="mb-4">
+    <mat-card-content>
+      <div class="filters-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Knowledge Base</mat-label>
+          <mat-select [(ngModel)]="selectedKnowledgeBaseId" (selectionChange)="onKnowledgeBaseChange($event)">
+            <mat-option value="">All Knowledge Bases</mat-option>
+            <mat-option *ngFor="let kb of knowledgeBases" [value]="kb.id">{{ kb.name }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Collection</mat-label>
+          <mat-select [(ngModel)]="selectedCollectionId" (selectionChange)="onCollectionChange($event)" [disabled]="!selectedKnowledgeBaseId">
+            <mat-option value="">All Collections</mat-option>
+            <mat-option *ngFor="let collection of collections" [value]="collection.id">{{ collection.name }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Search</mat-label>
+          <input matInput [(ngModel)]="searchQuery" placeholder="Search documents...">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- File Upload -->
+  <mat-card class="mb-4">
+    <mat-card-content>
+      <div class="upload-section">
+        <input
+          type="file"
+          #fileInput
+          (change)="onFileSelected($event)"
+          accept=".pdf,.txt,.docx"
+          style="display: none"
+        />
+        <button mat-raised-button color="primary" (click)="fileInput.click()" [disabled]="isUploading">
+          <mat-icon>upload_file</mat-icon>
+          Select File
+        </button>
+        <span *ngIf="selectedFile" class="file-name ml-2">{{ selectedFile.name }}</span>
+        <button
+          mat-raised-button
+          color="accent"
+          (click)="uploadDocument()"
+          [disabled]="!selectedFile || isUploading || !!validationError"
+          class="ml-2"
+        >
+          <mat-spinner *ngIf="isUploading" diameter="20" class="mr-2"></mat-spinner>
+          {{ isUploading ? 'Uploading...' : 'Upload' }}
+        </button>
+      </div>
+      <small class="mat-caption d-block mt-2">
+        📄 Supported formats: PDF, TXT, DOCX (Max size: 50MB)
+      </small>
+      <div *ngIf="validationError" class="error-message mt-3">
+        {{ validationError }}
+        <button mat-icon-button (click)="validationError = ''" class="float-right">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div *ngIf="uploadError" class="error-message mt-3">
+        {{ uploadError }}
+        <button mat-icon-button (click)="uploadError = ''" class="float-right">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div *ngIf="uploadSuccess" class="success-message mt-3">
+        {{ uploadSuccess }}
+        <button mat-icon-button (click)="uploadSuccess = ''" class="float-right">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Documents Table -->
+  <mat-card>
+    <mat-card-content>
+      <table mat-table [dataSource]="(documents$ | async) || []" class="w-100">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let doc">{{ doc.documentName }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="size">
+          <th mat-header-cell *matHeaderCellDef>Size</th>
+          <td mat-cell *matCellDef="let doc">{{ formatFileSize(doc.fileSize) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="pages">
+          <th mat-header-cell *matHeaderCellDef>Pages</th>
+          <td mat-cell *matCellDef="let doc">{{ doc.pages || '-' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="chunks">
+          <th mat-header-cell *matHeaderCellDef>Chunks</th>
+          <td mat-cell *matCellDef="let doc">{{ doc.chunkCount || '-' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="uploaded">
+          <th mat-header-cell *matHeaderCellDef>Uploaded</th>
+          <td mat-cell *matCellDef="let doc">{{ doc.uploadedAt | date: 'short' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let doc">
+            <button
+              mat-icon-button
+              (click)="loadVersionHistory(doc.documentId, doc.documentName)"
+              title="View Version History"
+              color="primary"
+            >
+              <mat-icon>history</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              (click)="deleteDocument(doc.documentId)"
+              title="Delete"
+              color="warn"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+      <div *ngIf="(documents$ | async)?.length === 0" class="text-center p-5 text-muted">
+        <mat-icon class="large-icon">folder_open</mat-icon>
+        <p class="mt-2">No documents uploaded yet. Upload a PDF, TXT, or DOCX file to get started.</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Version History Dialog -->
+  <div class="modal-overlay" *ngIf="showVersionHistory" (click)="closeVersionHistory()"></div>
+  <mat-card class="version-dialog" *ngIf="showVersionHistory">
+    <mat-card-header>
+      <mat-card-title>Version History: {{ selectedDocumentName }}</mat-card-title>
+      <button mat-icon-button (click)="closeVersionHistory()" class="close-button">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-card-header>
+    <mat-card-content>
+      <table mat-table [dataSource]="selectedDocumentVersions" class="w-100">
+        <ng-container matColumnDef="version">
+          <th mat-header-cell *matHeaderCellDef>Version</th>
+          <td mat-cell *matCellDef="let version">v{{ version.versionNumber }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="chunkCount">
+          <th mat-header-cell *matHeaderCellDef>Chunk Count</th>
+          <td mat-cell *matCellDef="let version">{{ version.chunkCount }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="embeddingModel">
+          <th mat-header-cell *matHeaderCellDef>Embedding Model</th>
+          <td mat-cell *matCellDef="let version">{{ version.embeddingModel }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef>Created</th>
+          <td mat-cell *matCellDef="let version">{{ version.createdAt | date: 'short' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let version">
+            <mat-chip [color]="version.isActive ? 'primary' : 'accent'">
+              {{ version.isActive ? 'Active' : 'Inactive' }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let version">
+            <button
+              mat-stroked-button
+              (click)="restoreVersion(version.id)"
+              [disabled]="version.isActive"
+              *ngIf="!version.isActive"
+            >
+              Restore
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="['version', 'chunkCount', 'embeddingModel', 'createdAt', 'status', 'actions']"></tr>
+        <tr mat-row *matRowDef="let row; columns: ['version', 'chunkCount', 'embeddingModel', 'createdAt', 'status', 'actions'];"></tr>
+      </table>
+      <div *ngIf="selectedDocumentVersions.length === 0" class="text-center p-4 text-muted">
+        No version history available.
+      </div>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-button (click)="closeVersionHistory()">Close</button>
+    </mat-card-actions>
+  </mat-card>
+
+  <!-- Upload Success Modal -->
+  <div class="modal-overlay" *ngIf="showUploadSuccess" (click)="closeUploadSuccessModal()"></div>
+  <mat-card class="success-dialog" *ngIf="showUploadSuccess">
+    <mat-card-header>
+      <mat-card-title class="success-title">
+        <mat-icon class="success-icon">check_circle</mat-icon>
+        Upload Successful
+      </mat-card-title>
+      <button mat-icon-button (click)="closeUploadSuccessModal()" class="close-button">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="success-content">
+        <p class="success-message">Your document has been successfully uploaded and processed.</p>
+        
+        <div class="document-details">
+          <div class="detail-item">
+            <mat-icon class="detail-icon">description</mat-icon>
+            <div class="detail-info">
+              <span class="detail-label">Document Name</span>
+              <span class="detail-value">{{ uploadSuccessData?.documentName }}</span>
+            </div>
+          </div>
+          
+          <div class="detail-item">
+            <mat-icon class="detail-icon">view_module</mat-icon>
+            <div class="detail-info">
+              <span class="detail-label">Chunks Created</span>
+              <span class="detail-value">{{ uploadSuccessData?.chunks }}</span>
+            </div>
+          </div>
+          
+          <div class="detail-item">
+            <mat-icon class="detail-icon">storage</mat-icon>
+            <div class="detail-info">
+              <span class="detail-label">File Size</span>
+              <span class="detail-value">{{ formatFileSize(uploadSuccessData?.fileSize || 0) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+    <mat-card-actions class="success-actions">
+      <button mat-raised-button color="primary" (click)="closeUploadSuccessModal()">
+        Done
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>

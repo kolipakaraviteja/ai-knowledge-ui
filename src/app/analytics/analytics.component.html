@@ -1,0 +1,61 @@
+<div class="container-fluid p-4">
+  <h2 class="mb-4">Analytics Dashboard</h2>
+
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="card bg-primary text-white">
+        <div class="card-body">
+          <h6 class="card-title text-white-50">Total Conversations</h6>
+          <p class="card-text fs-3">{{ (analytics$ | async)?.totalConversations || 0 }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card bg-success text-white">
+        <div class="card-body">
+          <h6 class="card-title text-white-50">Total Messages</h6>
+          <p class="card-text fs-3">{{ (analytics$ | async)?.totalMessages || 0 }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card bg-info text-white">
+        <div class="card-body">
+          <h6 class="card-title text-white-50">Total Documents</h6>
+          <p class="card-text fs-3">{{ (analytics$ | async)?.totalDocuments || 0 }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card bg-warning">
+        <div class="card-body">
+          <h6 class="card-title">Active Conversations</h6>
+          <p class="card-text fs-3">
+            {{ (analytics$ | async)?.conversationMetrics?.totalActiveConversations || 0 }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">Document Summary</h5>
+        </div>
+        <div class="card-body">
+          <ul class="list-group">
+            <li
+              class="list-group-item"
+              *ngFor="let doc of (analytics$ | async)?.documentsSummary"
+            >
+              <span>{{ doc.name }}</span>
+              <span class="badge bg-secondary float-end">{{ doc.status }}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
