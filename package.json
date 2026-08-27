@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:render": "ng build --configuration=production --base-href=/ && mv dist/ai-knowledge-ui/browser/* dist/ai-knowledge-ui/ && rm -rf dist/ai-knowledge-ui/browser",
     "watch": "ng build --watch --configuration development"
   },
   "prettier": {

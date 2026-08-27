@@ -2,6 +2,6 @@ services:
   - type: web
     name: ai-knowledge-ui
     env: node
-    buildCommand: npm install && npm run build -- --configuration=render --base-href=/ && mv dist/ai-knowledge-ui/browser/* dist/ai-knowledge-ui/ && rm -rf dist/ai-knowledge-ui/browser
+    buildCommand: npm install && npm run build:render
     startCommand: npx serve dist/ai-knowledge-ui -s -l 3000
     plan: free
