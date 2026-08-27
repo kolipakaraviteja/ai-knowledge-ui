@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/knowledge-management/knowledge-management.component.css"],
-  "sourcesContent": [".knowledge-management-container {\n  padding: 20px;\n}\n\n.header {\n  margin-bottom: 24px;\n}\n\n.header h2 {\n  margin: 0 0 8px 0;\n  color: #333;\n}\n\n.subtitle {\n  margin: 0;\n  color: #666;\n  font-size: 14px;\n}\n\nmat-tab-group {\n  background: white;\n  border-radius: 8px;\n  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);\n}\n"],
-  "mappings": ";AAAA,CAAC;AACC,WAAS;AACX;AAEA,CAAC;AACC,iBAAe;AACjB;AAEA,CAJC,OAIO;AACN,UAAQ,EAAE,EAAE,IAAI;AAChB,SAAO;AACT;AAEA,CAAC;AACC,UAAQ;AACR,SAAO;AACP,aAAW;AACb;AAEA;AACE,cAAY;AACZ,iBAAe;AACf,cAAY,EAAE,IAAI,IAAI,KAAK,CAAC,EAAE,CAAC,EAAE,CAAC,EAAE;AACtC;",
-  "names": []
-}

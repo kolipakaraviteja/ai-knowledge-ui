@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/shared/navbar.component.css"],
-  "sourcesContent": [".navbar-brand {\n  font-weight: 600;\n  font-size: 1.25rem;\n  color: #fff !important;\n  text-decoration: none;\n  transition: opacity 0.2s ease;\n}\n\n.navbar-brand:hover {\n  opacity: 0.9;\n}\n\n.nav-link {\n  margin-left: 1rem;\n  color: rgba(255, 255, 255, 0.85) !important;\n  text-decoration: none;\n  padding: 0.5rem 1rem;\n  border-radius: 0.25rem;\n  transition: all 0.2s ease;\n}\n\n.nav-link:hover {\n  color: #fff !important;\n  background-color: rgba(255, 255, 255, 0.1);\n}\n\n.nav-link.active {\n  color: #fff !important;\n  background-color: rgba(255, 255, 255, 0.2);\n  font-weight: 500;\n}\n\n.navbar-toggler {\n  border: none;\n  padding: 0.25rem 0.5rem;\n}\n\n.navbar-toggler:focus {\n  box-shadow: none;\n}\n"],
-  "mappings": ";AAAA,CAAC;AACC,eAAa;AACb,aAAW;AACX,SAAO;AACP,mBAAiB;AACjB,cAAY,QAAQ,KAAK;AAC3B;AAEA,CARC,YAQY;AACX,WAAS;AACX;AAEA,CAAC;AACC,eAAa;AACb,SAAO,KAAK,GAAG,EAAE,GAAG,EAAE,GAAG,EAAE;AAC3B,mBAAiB;AACjB,WAAS,OAAO;AAChB,iBAAe;AACf,cAAY,IAAI,KAAK;AACvB;AAEA,CATC,QASQ;AACP,SAAO;AACP,oBAAkB,KAAK,GAAG,EAAE,GAAG,EAAE,GAAG,EAAE;AACxC;AAEA,CAdC,QAcQ,CAAC;AACR,SAAO;AACP,oBAAkB,KAAK,GAAG,EAAE,GAAG,EAAE,GAAG,EAAE;AACtC,eAAa;AACf;AAEA,CAAC;AACC,UAAQ;AACR,WAAS,QAAQ;AACnB;AAEA,CALC,cAKc;AACb,cAAY;AACd;",
-  "names": []
-}

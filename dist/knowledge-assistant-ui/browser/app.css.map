@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["angular:styles/component:css;a44f561a9dfc746d2061ad2fb1670a36f20000dd7d05961266525892a4acdf94;/Users/workspace/Desktop/workspace/Enterprise AI Knowledge Assistant/ai-knowledge-assistant-ui/src/app/app.ts"],
-  "sourcesContent": ["\n    :host {\n      height: 100vh;\n      display: flex;\n      flex-direction: column;\n    }\n  "],
-  "mappings": ";AACI;AACE,UAAQ;AACR,WAAS;AACT,kBAAgB;AAClB;",
-  "names": []
-}
