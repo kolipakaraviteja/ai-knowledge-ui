@@ -3,5 +3,5 @@ services:
     name: ai-knowledge-ui
     runtime: static
     buildCommand: npm install && npm run build -- --configuration=render --base-href=/
-    publishDir: dist/ai-knowledge-ui
+    publishDir: dist/ai-knowledge-ui/browser
     plan: free
