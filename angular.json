@@ -66,6 +66,7 @@
               "outputHashing": "all",
               "sourceMap": false,
               "extractLicenses": true,
+              "outputPath": "dist/ai-knowledge-ui",
               "budgets": [
                 {
                   "type": "initial",
