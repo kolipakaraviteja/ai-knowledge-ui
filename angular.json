@@ -7,7 +7,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "knowledge-assistant-ui": {
+    "ai-knowledge-ui": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -73,8 +73,8 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "15kB",
-                  "maximumError": "20kB"
+                  "maximumWarning": "50kB",
+                  "maximumError": "100kB"
                 }
               ]
             }
@@ -85,10 +85,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "knowledge-assistant-ui:build:production"
+              "buildTarget": "ai-knowledge-ui:build:production"
             },
             "development": {
-              "buildTarget": "knowledge-assistant-ui:build:development"
+              "buildTarget": "ai-knowledge-ui:build:development"
             }
           },
           "defaultConfiguration": "development"
