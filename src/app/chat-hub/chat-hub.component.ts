@@ -29,6 +29,8 @@ export class ChatHubComponent {
       const tab = params['tab'];
       if (tab === 'conversations') {
         this.selectedTab = 1;
+      } else if (tab === 'chat') {
+        this.selectedTab = 0;
       }
     });
   }

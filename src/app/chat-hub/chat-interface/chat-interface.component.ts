@@ -8,6 +8,7 @@ import { Clipboard } from '@angular/cdk/clipboard';
 import { HttpClient } from '@angular/common/http';
 import { KnowledgeBasesService } from '../../core/services/knowledge-bases.service';
 import { CollectionsService } from '../../core/services/collections.service';
+import { ActivatedRoute } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -57,6 +58,7 @@ export class ChatInterfaceComponent implements OnInit {
   private http = inject(HttpClient);
   private knowledgeBasesService = inject(KnowledgeBasesService);
   private collectionsService = inject(CollectionsService);
+  private route = inject(ActivatedRoute);
 
   messages: Message[] = [];
   newMessage = '';
@@ -76,8 +78,17 @@ export class ChatInterfaceComponent implements OnInit {
   selectedCollectionId: string | null = null;
 
   ngOnInit(): void {
-    this.startNewConversation();
     this.loadKnowledgeBases();
+    
+    // Check if there's a conversationId in query params
+    this.route.queryParams.subscribe(params => {
+      const conversationId = params['conversationId'];
+      if (conversationId) {
+        this.loadConversation(conversationId);
+      } else {
+        this.startNewConversation();
+      }
+    });
   }
 
   loadKnowledgeBases(): void {
@@ -133,6 +144,38 @@ export class ChatInterfaceComponent implements OnInit {
         console.error('Failed to start conversation:', error);
         this.errorMessage = 'Failed to start conversation. Is the backend running?';
       },
+    });
+  }
+
+  loadConversation(conversationId: string): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+    
+    // Load conversation details
+    this.chatService.getConversation(conversationId).subscribe({
+      next: (conversation) => {
+        this.conversationId = conversation.id;
+        this.conversationTitle = conversation.title;
+      },
+      error: (err) => {
+        console.error('Failed to load conversation details:', err);
+        this.errorMessage = 'Failed to load conversation details';
+        this.isLoading = false;
+      }
+    });
+
+    // Load conversation messages
+    this.chatService.getConversationMessages(conversationId).subscribe({
+      next: (messages) => {
+        this.messages = messages;
+        this.isLoading = false;
+        this.generateFollowUpQuestions();
+      },
+      error: (err) => {
+        console.error('Failed to load conversation messages:', err);
+        this.errorMessage = 'Failed to load conversation messages';
+        this.isLoading = false;
+      }
     });
   }
 

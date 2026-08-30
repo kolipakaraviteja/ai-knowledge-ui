@@ -240,6 +240,20 @@ export class ChatService {
   }
 
   /**
+   * Get messages for a specific conversation
+   */
+  getConversationMessages(conversationId: string): Observable<Message[]> {
+    return this.http.get<Message[]>(`${this.chatApiUrl}/conversations/${conversationId}/messages`);
+  }
+
+  /**
+   * Get conversation details
+   */
+  getConversation(conversationId: string): Observable<Conversation> {
+    return this.http.get<Conversation>(`${this.chatApiUrl}/conversations/${conversationId}`);
+  }
+
+  /**
    * Pin a conversation
    */
   pinConversation(conversationId: string): Observable<void> {
