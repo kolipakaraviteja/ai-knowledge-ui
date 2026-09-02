@@ -1,0 +1,161 @@
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Admin Dashboard</h1>
+        <button
+          class="btn btn-primary"
+          (click)="toggleCreateUserForm()"
+          [disabled]="showCreateUserForm"
+        >
+          <i class="bi bi-person-plus me-2"></i>Create User
+        </button>
+      </div>
+
+      <!-- Create User Form -->
+      <div class="card mb-4" *ngIf="showCreateUserForm">
+        <div class="card-header">
+          <h5 class="card-title mb-0">Create New User</h5>
+        </div>
+        <div class="card-body">
+          <form (ngSubmit)="createUser()">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input
+                  type="email"
+                  class="form-control"
+                  id="email"
+                  [(ngModel)]="newUser.email"
+                  name="email"
+                  required
+                  email
+                />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="username"
+                  [(ngModel)]="newUser.username"
+                  name="username"
+                  required
+                  minlength="3"
+                />
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  id="password"
+                  [(ngModel)]="newUser.password"
+                  name="password"
+                  required
+                  minlength="6"
+                />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="role" class="form-label">Role</label>
+                <select
+                  class="form-select"
+                  id="role"
+                  [(ngModel)]="newUser.role"
+                  name="role"
+                  required
+                >
+                  <option value="USER">User</option>
+                  <option value="ADMIN">Admin</option>
+                </select>
+              </div>
+            </div>
+            <div class="d-flex gap-2">
+              <button
+                type="submit"
+                class="btn btn-primary"
+                [disabled]="creatingUser"
+              >
+                <span *ngIf="!creatingUser">Create User</span>
+                <span *ngIf="creatingUser">
+                  <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  Creating...
+                </span>
+              </button>
+              <button
+                type="button"
+                class="btn btn-secondary"
+                (click)="toggleCreateUserForm()"
+                [disabled]="creatingUser"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Error Alert -->
+      <div *ngIf="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ error }}
+        <button type="button" class="btn-close" (click)="error = null"></button>
+      </div>
+
+      <!-- Users Table -->
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">Users</h5>
+        </div>
+        <div class="card-body">
+          <div *ngIf="loading" class="text-center py-4">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+          
+          <div *ngIf="!loading && users.length === 0" class="text-center py-4 text-muted">
+            No users found
+          </div>
+
+          <div class="table-responsive" *ngIf="!loading && users.length > 0">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Username</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Created At</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let user of users">
+                  <td>{{ user.username }}</td>
+                  <td>{{ user.email }}</td>
+                  <td>
+                    <span class="badge" [class.bg-primary]="user.role === 'ADMIN'" [class.bg-secondary]="user.role === 'USER'">
+                      {{ user.role }}
+                    </span>
+                  </td>
+                  <td>{{ formatDate(user.createdAt) }}</td>
+                  <td>
+                    <button
+                      class="btn btn-sm btn-danger"
+                      (click)="deleteUser(user.id)"
+                      [disabled]="user.id === currentUser?.id"
+                      title="Delete user"
+                    >
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

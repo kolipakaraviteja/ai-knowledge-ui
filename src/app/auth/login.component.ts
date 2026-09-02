@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from '../core/services/auth.service';
+import { AuthService, LoginRequest } from '../core/services/auth.service';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -25,23 +25,23 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // If user is already logged in, redirect to chat
+    // If user is already logged in, redirect to dashboard
     this.authService.currentUser$.subscribe(user => {
       if (user) {
-        this.router.navigate(['/chat']);
+        this.router.navigate(['/dashboard']);
       }
     });
   }
 
   createForm(): void {
     this.loginForm = this.fb.group({
-      username: ['', [Validators.required]],
+      email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required]],
     });
   }
 
-  get username() {
-    return this.loginForm.get('username');
+  get email() {
+    return this.loginForm.get('email');
   }
 
   get password() {
@@ -56,11 +56,12 @@ export class LoginComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
-    const { username, password } = this.loginForm.value;
+    const loginRequest: LoginRequest = this.loginForm.value;
 
-    this.authService.login(username, password).subscribe({
+    this.authService.login(loginRequest).subscribe({
       next: () => {
-        this.router.navigate(['/chat']);
+        this.router.navigate(['/dashboard']);
+        this.isLoading = false;
       },
       error: (error) => {
         console.error('Login error:', error);

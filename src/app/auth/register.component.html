@@ -2,9 +2,9 @@
   <div class="card shadow" style="width: 100%; max-width: 400px;">
     <div class="card-body p-5">
       <h2 class="card-title text-center mb-4">Knowledge Assistant</h2>
-      <p class="text-center text-muted mb-4">Sign in to your account</p>
+      <p class="text-center text-muted mb-4">Create your account</p>
 
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
         <div class="mb-3">
           <label for="email" class="form-label">Email</label>
           <input
@@ -22,6 +22,22 @@
         </div>
 
         <div class="mb-3">
+          <label for="username" class="form-label">Username</label>
+          <input
+            type="text"
+            class="form-control"
+            id="username"
+            formControlName="username"
+            placeholder="Enter username"
+            [class.is-invalid]="username?.invalid && username?.touched"
+          />
+          <div class="invalid-feedback" *ngIf="username?.invalid && username?.touched">
+            <span *ngIf="username?.errors?.['required']">Username is required</span>
+            <span *ngIf="username?.errors?.['minlength']">Username must be at least 3 characters</span>
+          </div>
+        </div>
+
+        <div class="mb-3">
           <label for="password" class="form-label">Password</label>
           <input
             type="password"
@@ -32,7 +48,8 @@
             [class.is-invalid]="password?.invalid && password?.touched"
           />
           <div class="invalid-feedback" *ngIf="password?.invalid && password?.touched">
-            Password is required
+            <span *ngIf="password?.errors?.['required']">Password is required</span>
+            <span *ngIf="password?.errors?.['minlength']">Password must be at least 6 characters</span>
           </div>
         </div>
 
@@ -44,12 +61,12 @@
         <button
           type="submit"
           class="btn btn-primary w-100"
-          [disabled]="loginForm.invalid || isLoading"
+          [disabled]="registerForm.invalid || isLoading"
         >
-          <span *ngIf="!isLoading">Sign In</span>
+          <span *ngIf="!isLoading">Register</span>
           <span *ngIf="isLoading">
             <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-            Signing in...
+            Registering...
           </span>
         </button>
       </form>
@@ -57,8 +74,8 @@
       <hr class="my-4" />
 
       <div class="text-center">
-        <p class="text-muted small mb-2">Don't have an account?</p>
-        <a routerLink="/register" class="btn btn-outline-primary btn-sm">Register</a>
+        <p class="text-muted small mb-2">Already have an account?</p>
+        <a routerLink="/login" class="btn btn-outline-primary btn-sm">Sign In</a>
       </div>
     </div>
   </div>

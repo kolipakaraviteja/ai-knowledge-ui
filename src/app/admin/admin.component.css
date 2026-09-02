@@ -1,0 +1,24 @@
+.container-fluid {
+  max-width: 1400px;
+}
+
+.card {
+  border: none;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.card-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  font-weight: 600;
+}
+
+.table {
+  margin-bottom: 0;
+}
+
+.badge {
+  font-size: 0.75rem;
+  padding: 0.375rem 0.5rem;
+}

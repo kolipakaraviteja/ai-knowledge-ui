@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { ChatService, Conversation } from '../core/services/chat.service';
+import { AuthService } from '../core/services/auth.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -13,14 +14,25 @@ import { ChatService, Conversation } from '../core/services/chat.service';
 export class SidebarComponent implements OnInit {
   private chatService = inject(ChatService);
   private router = inject(Router);
+  authService = inject(AuthService);
   
   recentConversations: Conversation[] = [];
   loading = false;
   showConversations = true;
   showKnowledgeBases = false;
 
+  get isAuthenticated() {
+    return this.authService.isAuthenticated();
+  }
+
+  get isAdmin() {
+    return this.authService.isAdmin();
+  }
+
   ngOnInit(): void {
-    this.loadRecentConversations();
+    if (this.isAuthenticated) {
+      this.loadRecentConversations();
+    }
   }
 
   toggleKnowledgeBases(): void {
@@ -28,6 +40,10 @@ export class SidebarComponent implements OnInit {
   }
 
   loadRecentConversations(): void {
+    if (!this.isAuthenticated) {
+      return;
+    }
+
     this.loading = true;
     this.chatService.getAllConversations().subscribe({
       next: (conversations) => {

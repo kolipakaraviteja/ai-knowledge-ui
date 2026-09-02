@@ -3,17 +3,33 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { Router } from '@angular/router';
 
-interface User {
+export interface User {
   id: string;
   username: string;
   email: string;
-  roles: string[];
+  role: string;
+  createdAt?: string;
 }
 
-interface AuthResponse {
-  user: User;
-  token?: string;
+export interface AuthResponse {
+  token: string;
+  userId: string;
+  email: string;
+  username: string;
+  role: string;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface RegisterRequest {
+  email: string;
+  username: string;
+  password: string;
 }
 
 @Injectable({
@@ -21,46 +37,88 @@ interface AuthResponse {
 })
 export class AuthService {
   private apiUrl = `${environment.apiUrl}/api/auth`;
-  private currentUserSubject = new BehaviorSubject<User | null>(null);
-  public currentUser$ = this.currentUserSubject.asObservable();
+  private tokenSubject = new BehaviorSubject<string | null>(null);
+  private userSubject = new BehaviorSubject<User | null>(null);
+  public currentUser$ = this.userSubject.asObservable();
+  public token$ = this.tokenSubject.asObservable();
 
-  constructor(private http: HttpClient) {
-    // Auth disabled - set dummy user
-    this.currentUserSubject.next({
-      id: 'anonymous',
-      username: 'Demo User',
-      email: 'demo@example.com',
-      roles: ['user'],
-    });
+  constructor(private http: HttpClient, private router: Router) {
+    const token = localStorage.getItem('token');
+    if (token) {
+      this.tokenSubject.next(token);
+      this.getCurrentUser().subscribe();
+    }
   }
 
-  checkCurrentUser(): void {
-    // Auth disabled - skipped
+  get currentUserValue(): User | null {
+    return this.userSubject.value;
   }
 
-  login(username: string, password: string): Observable<AuthResponse> {
-    return this.http
-      .post<AuthResponse>(`${this.apiUrl}/login`, { username, password })
-      .pipe(
-        tap((response) => {
-          this.currentUserSubject.next(response.user);
-        })
-      );
+  get tokenValue(): string | null {
+    return this.tokenSubject.value;
   }
 
-  logout(): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/logout`, {}).pipe(
-      tap(() => {
-        this.currentUserSubject.next(null);
+  login(credentials: LoginRequest): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials).pipe(
+      map(response => {
+        localStorage.setItem('token', response.token);
+        this.tokenSubject.next(response.token);
+        const user: User = {
+          id: response.userId,
+          email: response.email,
+          username: response.username,
+          role: response.role
+        };
+        this.userSubject.next(user);
+        return response;
       })
     );
   }
 
-  isAuthenticated(): Observable<boolean> {
-    return this.currentUser$.pipe(map((user) => !!user));
+  register(data: RegisterRequest): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/register`, data).pipe(
+      map(response => {
+        localStorage.setItem('token', response.token);
+        this.tokenSubject.next(response.token);
+        const user: User = {
+          id: response.userId,
+          email: response.email,
+          username: response.username,
+          role: response.role
+        };
+        this.userSubject.next(user);
+        return response;
+      })
+    );
   }
 
-  getCurrentUser(): User | null {
-    return this.currentUserSubject.value;
+  getCurrentUser(): Observable<User> {
+    return this.http.get<User>(`${this.apiUrl}/me`).pipe(
+      map(user => {
+        this.userSubject.next(user);
+        return user;
+      })
+    );
+  }
+
+  logout(): void {
+    localStorage.removeItem('token');
+    this.tokenSubject.next(null);
+    this.userSubject.next(null);
+    this.router.navigate(['/login']);
+  }
+
+  isAuthenticated(): boolean {
+    return !!this.tokenSubject.value;
+  }
+
+  isAdmin(): boolean {
+    return this.currentUserValue?.role === 'ADMIN';
+  }
+
+  checkCurrentUser(): void {
+    if (this.tokenSubject.value) {
+      this.getCurrentUser().subscribe();
+    }
   }
 }

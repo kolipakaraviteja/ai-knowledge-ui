@@ -8,6 +8,7 @@ export const apiInterceptor: HttpInterceptorFn = (request, next) => {
   }
 
   // Clone request and add credentials
+  // The auth interceptor will handle JWT token injection
   const apiRequest = request.clone({
     withCredentials: true,
   });
@@ -18,6 +19,7 @@ export const apiInterceptor: HttpInterceptorFn = (request, next) => {
       if (error.status === 0) {
         console.error('Connection failed. Ensure backend is running');
       }
+      // Note: 401 errors are handled by the auth interceptor
       return throwError(() => error);
     })
   );

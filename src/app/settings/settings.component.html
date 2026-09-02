@@ -13,7 +13,7 @@
             <input
               type="text"
               class="form-control"
-              [value]="(authSvc.currentUser$ | async)?.username"
+              [value]="currentUser?.username"
               disabled
             />
           </div>
@@ -22,16 +22,25 @@
             <input
               type="email"
               class="form-control"
-              [value]="(authSvc.currentUser$ | async)?.email"
+              [value]="currentUser?.email"
               disabled
             />
           </div>
           <div class="mb-3">
-            <label class="form-label">Roles</label>
+            <label class="form-label">Role</label>
             <input
               type="text"
               class="form-control"
-              [value]="((authSvc.currentUser$ | async)?.roles || []).join(', ')"
+              [value]="currentUser?.role"
+              disabled
+            />
+          </div>
+          <div class="mb-3" *ngIf="currentUser?.createdAt">
+            <label class="form-label">Member Since</label>
+            <input
+              type="text"
+              class="form-control"
+              [value]="currentUser?.createdAt | date:'medium'"
               disabled
             />
           </div>
@@ -67,6 +76,21 @@
             </label>
           </div>
           <button class="btn btn-primary">Save Preferences</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">Account Actions</h5>
+        </div>
+        <div class="card-body">
+          <button class="btn btn-danger" (click)="logout()">
+            <i class="bi bi-box-arrow-right me-2"></i>Logout
+          </button>
         </div>
       </div>
     </div>
